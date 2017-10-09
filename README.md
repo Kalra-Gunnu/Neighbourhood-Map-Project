@@ -12,7 +12,7 @@ Instructions to run site:
 4. `Hide Listings` hides al the markers.
 5. `Zoom` allows you to center the map to your area of interest.
 6. An additional functionality gives you an option to search for all the locations from your provided location in the time interval & the mode of travelling specified.
-7. If using with a screen size less than 750px, All the locations will  be in a drawer which ooens when you click the nav button on top left.
+7. If using with a screen size less than 750px, All the locations will  be in a drawer which opens when you click the nav button on top left.
 8. `Reset Map Zoom` recenters the map and resets the zoom.
 9. A Flickr icon is also present which provides images from your favorite location.
 
