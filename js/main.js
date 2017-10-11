@@ -16,6 +16,12 @@ var locations = [
   {title: 'Durgam Cheruvu', location: {lat: 17.430041, lng: 78.389459}, id: 'nav11', visible: ko.observable(true), boolTest: true}
 ];
 
+var flickrPhotoArray = [];
+
+var counter = 0;
+
+var imagesAreSet = false;
+
 // Initialise a map variable
 var map;
 
@@ -400,7 +406,6 @@ function displayMarkersWithinTime(response) {
 
   var origins = response.originAddresses;
   var destinations = response.destinationAddresses;
-  //destinations.setmap(map);
 
   var atLeastOne = false;
 
@@ -465,7 +470,6 @@ function displayDirections(origin) {
 
 // Opens an Infowindow and renders the latLng and StreetView for the location/marker clicked
 function populateInfoWindow(marker, infowindow) {
-  //console.log(marker);
   if(infowindow.marker != marker) {
     infowindow.marker = marker;
     infowindow.setContent('');
@@ -536,7 +540,7 @@ function getflickrContent(marker) {
         flickrJSON = photo;
       },
       error: function() {
-        $('.flickr-image-container').append('<h1 style="text-align: center;">Sorry!</h1><br><h2 style="text-align: center;">Flickr Images Could Not Be Loaded</h2>');
+        viewListModel.flickrImage('<h1 style="text-align: center;">Sorry!</h1><br><h2 style="text-align: center;">Flickr Images Could Not Be Loaded</h2>');
         $("#right-arrow").hide();
         $("#left-arrow").hide();
       }
@@ -544,24 +548,15 @@ function getflickrContent(marker) {
   }
   getFlickrImages(marker);
 
-  var flickrPhotoArray = [];
-  var counter = 0;
-  var imagesAreSet = false;
-
   //Get random images from flickr JSON
   //Store image data in flickrPhotoArray
   //Hide all images except the first
   function setFlickrImages() {
     if(imagesAreSet === false) {
       for(var i=0; i < 25; i++) {
-        var number = Math.floor((Math.random() * 250) + 1);
-        var photo = 'https://farm' + flickrJSON[number].farm + '.staticflickr.com/' + flickrJSON[number].server + '/' + flickrJSON[number].id + '_' + flickrJSON[number].secret + '.jpg';
+        var photo = 'https://farm' + flickrJSON[i].farm + '.staticflickr.com/' + flickrJSON[i].server + '/' + flickrJSON[i].id + '_' + flickrJSON[i].secret + '.jpg';
         flickrPhotoArray.push(photo);
-        $('.flickr-image-container').append('<img id="flickr-image' + i + '" src="' + photo + '" alt="' + flickrJSON[number].title + ' Flickr Image">');
-        $("#flickr-image" + i).hide();  
-        if(i < 1) {
-          $("#flickr-image" + i).show();
-        }
+        viewListModel.flickrImage('<img id="flickr-image' + i + '" src="' + photo + '" alt="' + flickrJSON[i].title + ' Flickr Image">');
       }
     } else {
       $("#flickr-image" + counter).show();
@@ -633,7 +628,8 @@ var viewListModel = {
   availableDurations: ko.observable(['10','15','30','60','120','300']),
   selectedDuration: ko.observable(''),
   availableModes: ko.observable(['DRIVING','WALKING','BICYCLING','TRANSIT']),
-  selectedMode: ko.observable('')
+  selectedMode: ko.observable(''),
+  flickrImage: ko.observable('')
 };
 
 viewListModel.markers = ko.dependentObservable(function() {
