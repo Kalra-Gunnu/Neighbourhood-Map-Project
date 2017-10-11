@@ -484,7 +484,7 @@ function populateInfoWindow(marker, infowindow) {
         map.setCenter(nearStreetViewLocation);
         map.setZoom(16);
         var heading = google.maps.geometry.spherical.computeHeading(nearStreetViewLocation, marker.position);
-        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div id="pano"></div>' + '<img id="flickr" src="img/flickr.png" alt="Flickr Logo">');
+        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div id="pano"></div>');
         
         var panoramaOptions = {
           position: nearStreetViewLocation,
