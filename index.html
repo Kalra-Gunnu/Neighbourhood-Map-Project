@@ -15,7 +15,6 @@
 		<div class="container">
 			<div class="reset-container">
 				<button id="reset">Reset Map Zoom</button>
-				<img id="flickr" src="img/flickr.png" alt="Flickr Logo">
 			</div> 
 			<div class="modal">
 				<div class="modal-images">
@@ -27,15 +26,15 @@
 			</div>
 			<nav id="drawer" class="nav">
 				<div class="options-box" >
-					<input id="input" placeholder="Search…" type="input" data-bind="textInput: query, valueUpdate: 'keydown'"></input>
+					<input id="input" placeholder="Search…" type="input" data-bind="textInput: query, valueUpdate: 'keydown', event: {keyup: set}"></input>
 					<div id="scroller">
 						<ul data-bind="template: {name: 'marker', foreach: locations}">
 						</ul>
 						<script type="text/html" id="marker">
 							<div data-bind="visible: visible">
-								<a href="#" data-bind="attr: {id: id}">
+								<a href="#" data-bind="attr: {id: id},">
 									<li>
-										<strong data-bind="text: title"></strong>
+										<strong data-bind="text: title, click: $root.listElem"></strong>
 									</li>
 								</a>
 							</div>
@@ -47,33 +46,25 @@
 						<input id="hide-listings" type="button" value="Hide Listings">
 						<hr>
 						<div>
-							<input type = "text" id = "zoom-to-area-text" placeholder = "Enter your favorite area!">
+							<input type = "text" id = "zoom-to-area-text" placeholder = "Enter your favorite area!" data-bind="textInput: address">
 							<input type = "button" id = "zoom-to-area" value = "Zoom">
 						</div>
 						<hr>
 						<div>
 							<span class = "text" >Within</span>
-							<select id = "max-duration">
-								<option value = "10">10 min</option>
-								<option value = "15">15 min</option>
-								<option value = "30">30 min</option>
-								<option value = "60">1 hour</option>
-								<option value = "120">2 hour</option>
-								<option value = "300">5 hour</option>
-						</select>
-						<select id = "mode">
-							<option value = "DRIVING">drive</option>
-							<option value = "WALKING">walk</option>
-							<option value = "BICYCLING">bike</option>
-							<option value = "TRANSIT">transit ride</option>
-						</select>
-						<span class = "text">of</span>
-						<input id = "search-within-time-text" type= "text" placeholder = "Search...">
-						<input id = "search-within-time" type = "button" value = "GO">
-					</div> 
-				</div>
+							<select data-bind="options: availableDurations, value: selectedDuration"></select>
+							<select data-bind="options: availableModes, value: selectedMode"></select>
+							<span class = "text">of</span>
+							<input id = "search-within-time-text" type= "text" placeholder = "Search...">
+							<input id = "search-within-time" type = "button" value = "GO">
+						</div> 
+					</div>
 			</nav>
-			<div id="map"></div>
+			<div class="container-fluid">
+				<div class="side-body">
+					<div id="map"></div>
+				</div>
+			</div>
 			<a id="menu" class="header__menu">
 				<svg xmlns="http://www.w3.org/20/svg" viewBox="0 0 24 24">
 				<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/>
@@ -81,11 +72,7 @@
 			</a>
 		</div>
 		
-		<script async defer 
-		src=
-		"http://maps.googleapis.com/maps/api/js?key=AIzaSyCQCMl8maoiGDKHwOu3THEN64f_nRkBRK0&libraries=places,drawing,geometry&v=3&callback=initMap">
-		</script>
-		<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 		<script type="text/javascript" src="js/lib/knockout-3.3.0.js"></script>
 		<script async type="text/javascript" src="js/flickr.js"></script>
 		<script src="js/main.js"> </script>
@@ -104,6 +91,10 @@
 			main.addEventListener('click', function() {
 				drawer.classList.remove('open');
 			});
+		</script>
+		<script async defer 
+		src=
+		"http://maps.googleapis.com/maps/api/js?key=AIzaSyCQCMl8maoiGDKHwOu3THEN64f_nRkBRK0&libraries=places,drawing,geometry&v=3&callback=initMap" onerror="viewListModel.errorMessage()">
 		</script>
 	</body>
 </html>

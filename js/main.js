@@ -32,7 +32,7 @@ var polygon = null;
 //CallBack function when google maps Api is loaded
 function initMap() {
   // Styles array to customise the map
-  /*var styles = [
+  var styles = [
     {
       "elementType": "geometry",
       "stylers": [
@@ -174,20 +174,15 @@ function initMap() {
         }
       ]
     }
-  ];*/
+  ];
 
   // Create a new Map with the following properties
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 17.3392035, lng: 78.540914},
     zoom: 11,
-    //styles: styles, // Apply costume styles to map
+    styles: styles, // Apply costume styles to map
     mapTypeControl: false
   });
-
-  var timeAutocomplete = new google.maps.places.Autocomplete(document.getElementById('search-within-time-text'));
-  var zoomAutocomplete = new google.maps.places.Autocomplete(document.getElementById('zoom-to-area-text'));
-  timeAutocomplete.bindTo('bounds', map);
-  zoomAutocomplete.bindTo('bounds', map);
 
   // Loop over each location and define the markers associated with it
   locations.forEach(function(loc, index){
@@ -202,16 +197,6 @@ function initMap() {
     });
     
     markers.push(marker);
-
-    // Event listener for List elements to open a Infowindow when clicked 
-    var listElement = $('#nav' + index);
-    listElement.click((function(mark , index) {
-      return function(){
-        populateInfoWindow(mark, largeInfowindow);
-        toggleBounce(mark);
-      };
-    })(marker, index));
-
 
     // 'click' event listener on marker to open the infoWindow
     marker.addListener('click', function(){
@@ -339,7 +324,7 @@ function hideListings() {
 function zoomToArea() {
   var geocoder = new google.maps.Geocoder();
 
-  var address = document.getElementById('zoom-to-area-text').value;
+  var address = viewListModel.address().toLowerCase();
   if(address == '') {
     window.alert('You must enter an area, or address.');
   } else {
@@ -353,9 +338,14 @@ function zoomToArea() {
           map.setCenter(results[0].geometry.location);
           map.setZoom(15);
           var marker = new google.maps.Marker({
+            title: results[0].formatted_address,
             position: results[0].geometry.location
           });
           marker.setMap(map);
+          var infowindow = new google.maps.InfoWindow({
+            content : '<span>' + marker.title + '</span>'
+          });
+          infowindow.open(map,marker);
           marker.addListener('click', function(){
             toggleBounce(this);
           });
@@ -371,7 +361,6 @@ function zoomToArea() {
 function searchWithinTime() {
   var distanceMatrixService = new google.maps.DistanceMatrixService;
   var address = document.getElementById('search-within-time-text').value;
-  console.log(address);
   var marker = new google.maps.Marker({
     position : address
   })
@@ -386,7 +375,7 @@ function searchWithinTime() {
     }
     
     var destination = address;
-    var mode = document.getElementById('mode').value;
+    var mode = viewListModel.selectedMode();
     distanceMatrixService.getDistanceMatrix(
       {
         origins: origins,
@@ -407,7 +396,7 @@ function searchWithinTime() {
 
 // Function to display all markers within given period of time and given mode of travel
 function displayMarkersWithinTime(response) {
-  var maxDuration = document.getElementById('max-duration').value;
+  var maxDuration = viewListModel.selectedDuration();
 
   var origins = response.originAddresses;
   var destinations = response.destinationAddresses;
@@ -450,7 +439,7 @@ function displayDirections(origin) {
   hideListings();
   var directionsService = new google.maps.DirectionsService;
   var destinationAddress = document.getElementById('search-within-time-text').value;
-  var mode = document.getElementById('mode').value;
+  var mode = viewListModel.selectedMode();
   directionsService.route(
     {
       origin: origin,
@@ -476,6 +465,7 @@ function displayDirections(origin) {
 
 // Opens an Infowindow and renders the latLng and StreetView for the location/marker clicked
 function populateInfoWindow(marker, infowindow) {
+  //console.log(marker);
   if(infowindow.marker != marker) {
     infowindow.marker = marker;
     infowindow.setContent('');
@@ -494,7 +484,8 @@ function populateInfoWindow(marker, infowindow) {
         map.setCenter(nearStreetViewLocation);
         map.setZoom(16);
         var heading = google.maps.geometry.spherical.computeHeading(nearStreetViewLocation, marker.position);
-        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div id="pano"></div>');
+        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div id="pano"></div>' + '<img id="flickr" src="img/flickr.png" alt="Flickr Logo">');
+        
         var panoramaOptions = {
           position: nearStreetViewLocation,
           pov: {
@@ -506,16 +497,14 @@ function populateInfoWindow(marker, infowindow) {
       } 
       // Else Display an Error Message
       else {
-        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div>No Street View Found</div>');
-        map.setCenter(data.location.latLng);
-        map.setZoom(16);
+        infowindow.setContent('<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div><div>No Street View Found</div>' + '<img id="flickr" src="img/flickr.png" alt="Flickr Logo">');
       }
 
     }
-
+    
     streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
     infowindow.open(map, marker);
-  };
+  }
 };
 
 // Styled markers creating function
@@ -554,6 +543,11 @@ function searchWithinPolygon(){
 // Our ViewModel 
 var viewListModel = {
   query: ko.observable(''),
+  address: ko.observable(''),
+  availableDurations: ko.observable(['10','15','30','60','120','300']),
+  selectedDuration: ko.observable(''),
+  availableModes: ko.observable(['DRIVING','WALKING','BICYCLING','TRANSIT']),
+  selectedMode: ko.observable('')
 };
 
 viewListModel.markers = ko.dependentObservable(function() {
@@ -571,8 +565,26 @@ viewListModel.markers = ko.dependentObservable(function() {
   });
 }, viewListModel);
 
-ko.applyBindings(viewListModel);
+viewListModel.set = function() {
+  setMarkers();
+}
 
-$("#input").keyup(function() {
-setMarkers();
-});
+viewListModel.listElem = function(mark) {
+  var largeInfowindow = new google.maps.InfoWindow();
+  var marker = new google.maps.Marker({
+    position: mark.location,
+    title: mark.title,
+    icon: mark.defaultIcon,
+    animation: google.maps.Animation.DROP,
+    id: mark.id
+  });
+  marker.setMap(map);
+  populateInfoWindow(marker, largeInfowindow);
+  toggleBounce(marker);
+}
+
+viewListModel.errorMessage = function() {
+  window.alert('Google Maps not responding. Please try again later!!');
+}
+
+ko.applyBindings(viewListModel);

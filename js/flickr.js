@@ -2,38 +2,37 @@ var flickrJSON;
 
 //Binds click handler to flickr image to open modal
 $("#flickr").click(function() {
-    $(".modal").css("z-index", "3");
-    $(".modal").show();
+	$(".modal").css("z-index", "3");
+	$(".modal").show();
 });
 
 //Binds click handler to x button to close modal
 $("#exit-modal").click(function() {
-    $(".modal").css("z-index", "0");
-    $(".modal").hide();
-    $('.flickr-image-container img').hide();
-    imagesAreSet = true;
+	$(".modal").css("z-index", "0");
+	$(".modal").hide();
+	$('.flickr-image-container img').hide();
+	imagesAreSet = true;
 });
 
 //GET JSON from flickr
 //Display message if error getting flickr JSON
 function getFlickrImages() {
-		var flickrUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=d5831bdf210abd3d393c6af8142aed21&accuracy=16&lat=17.3392035&lon=78.540914&format=json';
-        
-        $.ajax({
-            url: flickrUrl,
-            dataType: 'jsonp',
-            jsonp: 'jsoncallback',
-            success: function(data) {
-                var photo = data.photos.photo;
-                flickrJSON = photo;
-            },
-            error: function() {
-				$('.flickr-image-container').append('<h1 style="text-align: center;">Sorry!</h1><br><h2 style="text-align: center;">Flickr Images Could Not Be Loaded</h2>');
-				$("#right-arrow").hide();
-				$("#left-arrow").hide();
+	var flickrUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=d5831bdf210abd3d393c6af8142aed21&accuracy=16&lat=17.3392035&lon=78.540914&format=json';
 
-				}
-        });
+	$.ajax({
+		url: flickrUrl,
+		dataType: 'jsonp',
+		jsonp: 'jsoncallback',
+		success: function(data) {
+			var photo = data.photos.photo;
+			flickrJSON = photo;
+		},
+		error: function() {
+			$('.flickr-image-container').append('<h1 style="text-align: center;">Sorry!</h1><br><h2 style="text-align: center;">Flickr Images Could Not Be Loaded</h2>');
+			$("#right-arrow").hide();
+			$("#left-arrow").hide();
+		}
+	});
 }
 getFlickrImages();
 
@@ -83,4 +82,4 @@ function scrollBackWard() {
 }
 
 $("#right-arrow").click(scrollForward);
-$("#left-arrow").click(scrollBackWard);        
+$("#left-arrow").click(scrollBackWard);
